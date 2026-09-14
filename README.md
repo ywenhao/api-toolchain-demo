@@ -53,7 +53,7 @@ HTTP_ADDR=127.0.0.1:8089 GRPC_ADDR=127.0.0.1:9092 mise run dev
 - `mise.toml` 固定 Go、Buf，并提供统一命令。
 - `go.mod` 的 `tool` 指令和 `go.sum` 固定 Go 生成器、Air 及依赖；`buf.gen*.yaml` 使用 `go tool` 调用它们。
 - `buf.lock` 固定 Google API 注解和 gnostic 注解的 BSR 提交及摘要。
-- `web/vendor/` 保存固定版本的 Swagger UI 静态资源、许可证及 SHA-256；浏览文档时不依赖 CDN。文档页使用官方默认的 Standalone 布局、样式和图标。
+- `web/vendor/` 保存固定版本的 Swagger UI 静态资源、许可证及 SHA-256；浏览文档时不依赖 CDN。文档页使用官方默认的 Standalone 布局、样式和图标，顶部通过原生文档下拉框切换 user / admin；直接访问 `/docs/user` 或 `/docs/admin` 会默认选中对应文档。
 
 参考：[Buf](https://buf.build/docs/generate)、[gRPC-Gateway](https://github.com/grpc-ecosystem/grpc-gateway)、[gnostic OpenAPI 插件](https://github.com/google/gnostic/tree/main/cmd/protoc-gen-openapi)、[Swagger UI](https://github.com/swagger-api/swagger-ui)。
 

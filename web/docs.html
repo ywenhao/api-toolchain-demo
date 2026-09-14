@@ -17,7 +17,11 @@
       window.onload = function () {
         const role = location.pathname.endsWith('/admin') ? 'admin' : 'user';
         window.ui = SwaggerUIBundle({
-          url: '/openapi/' + role + '.json',
+          urls: [
+            { name: 'user', url: '/openapi/user.json' },
+            { name: 'admin', url: '/openapi/admin.json' }
+          ],
+          'urls.primaryName': role,
           dom_id: '#swagger-ui',
           deepLinking: true,
           presets: [
