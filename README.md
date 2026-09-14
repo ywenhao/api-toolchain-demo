@@ -32,6 +32,14 @@ HTTP_ADDR=127.0.0.1:8089 GRPC_ADDR=127.0.0.1:9092 mise run dev
 
 这个演示不需要数据库、Redis、Node.js 或单独的 protoc 安装。任务和事件历史保存在内存中，**每次重启都会清空**。user/admin 在这里是接口分组，尚未实现登录、身份认证和数据权限隔离。
 
+打包二进制：
+
+```bash
+mise build
+```
+
+该任务先生成最新接口代码和 OpenAPI 文档，再关闭 CGO 编译服务，产物为 `dist/api-toolchain-demo`。在当前 Linux / WSL 环境下，生成的是 Linux 可执行文件；运行 `./dist/api-toolchain-demo` 即可启动。前端页面、Swagger UI 和文档已嵌入二进制，运行机器无需安装 Go 或 Buf。修改代码、页面或文档后，重新执行 `mise build` 即可更新产物。
+
 ## 2. 工具链及选择原因
 
 | 工具 | 固定版本 | 职责 |

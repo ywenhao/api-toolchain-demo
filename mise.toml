@@ -19,6 +19,14 @@ description = "生成并启动服务，不监听文件变化"
 depends = ["generate"]
 run = "go run ./cmd/server"
 
+[tasks.build]
+description = "生成接口和文档，打包二进制到 dist/api-toolchain-demo"
+depends = ["generate"]
+run = [
+  "mkdir -p dist",
+  "CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o dist/api-toolchain-demo ./cmd/server",
+]
+
 [tasks.check]
 description = "检查协议、产物可复现性和编译"
 run = ["buf lint", "go run ./cmd/checkgen", "go build ./..."]
