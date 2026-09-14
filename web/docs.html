@@ -1,5 +1,35 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><title>Proto API Lab · Swagger / OpenAPI 3</title><link rel="stylesheet" href="/assets/vendor/swagger-ui.css"><style>body{margin:0;background:#fafcf7}.lab-nav{padding:17px 28px;background:#13291f;color:#dcebcf;font:13px system-ui;display:flex;justify-content:space-between}.lab-nav a{color:inherit;text-decoration:none}.swagger-ui .topbar{display:none}.swagger-ui .info{margin:28px 0}.swagger-ui .scheme-container{box-shadow:none;border-bottom:1px solid #dae3d7}#swagger-ui{max-width:1240px;margin:auto}</style></head>
-<body><nav class="lab-nav"><a href="/">← 返回 CRUD / SSE 工作台</a><span><a href="/docs/user">用户端文档</a> · <a href="/docs/admin">管理端文档</a> · OpenAPI 3.0.3</span></nav><div id="swagger-ui"></div><script src="/assets/vendor/swagger-ui-bundle.js"></script><script>window.onload=()=>{const role=location.pathname.endsWith('/admin')?'admin':'user';document.title=(role==='admin'?'管理端':'用户端')+' · Proto API Lab';window.ui=SwaggerUIBundle({url:'/openapi/'+role+'.json',dom_id:'#swagger-ui',deepLinking:true,displayRequestDuration:true,defaultModelsExpandDepth:0,validatorUrl:null,layout:'BaseLayout',presets:[SwaggerUIBundle.presets.apis]})};</script></body>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Swagger UI</title>
+    <link rel="stylesheet" type="text/css" href="/assets/vendor/swagger-ui.css">
+    <link rel="stylesheet" type="text/css" href="/assets/vendor/index.css">
+    <link rel="icon" type="image/png" href="/assets/vendor/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/assets/vendor/favicon-16x16.png" sizes="16x16">
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="/assets/vendor/swagger-ui-bundle.js" charset="UTF-8"></script>
+    <script src="/assets/vendor/swagger-ui-standalone-preset.js" charset="UTF-8"></script>
+    <script>
+      window.onload = function () {
+        const role = location.pathname.endsWith('/admin') ? 'admin' : 'user';
+        window.ui = SwaggerUIBundle({
+          url: '/openapi/' + role + '.json',
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+          ],
+          plugins: [
+            SwaggerUIBundle.plugins.DownloadUrl
+          ],
+          layout: 'StandaloneLayout'
+        });
+      };
+    </script>
+  </body>
 </html>
