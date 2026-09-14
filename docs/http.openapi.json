@@ -1,0 +1,71 @@
+{
+  "paths": {
+    "/healthz": {
+      "get": {
+        "operationId": "Health",
+        "tags": ["系统"],
+        "summary": "健康检查",
+        "responses": {
+          "200": {
+            "description": "HTTP 服务可用",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["status", "service"],
+                  "properties": {"status": {"type": "string", "example": "ok"}, "service": {"type": "string", "example": "proto-api-lab"}}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events": {
+      "get": {
+        "operationId": "SubscribeTaskEvents",
+        "tags": ["实时事件"],
+        "summary": "订阅任务变化（SSE）",
+        "description": "真实的 text/event-stream 长连接。先发送 ready，之后发送 task.created、task.updated、task.deleted；每 10 秒发送注释心跳。支持 Last-Event-ID 或 last_event_id 查询参数重放最近 128 条事件。事件历史过期或服务重启后游标超出范围时发送 reset，客户端重新拉取列表。Swagger 的 Try it out 不适合持续流，请使用首页的实时面板、EventSource 或 curl -N。",
+        "parameters": [
+          {"name": "Last-Event-ID", "in": "header", "required": false, "description": "最后收到的非负整数事件 ID；优先于查询参数。", "schema": {"type": "string", "pattern": "^[0-9]+$"}},
+          {"name": "last_event_id", "in": "query", "required": false, "description": "方便浏览器首次连接时指定游标。", "schema": {"type": "string", "pattern": "^[0-9]+$"}}
+        ],
+        "responses": {
+          "200": {
+            "description": "SSE 流，响应持续保持打开",
+            "content": {
+              "text/event-stream": {
+                "schema": {"type": "string"},
+                "example": "retry: 1000\nevent: ready\ndata: {\"latestEventId\":\"0\",\"replayed\":0}\n\nid: 1\nevent: task.created\ndata: {\"eventId\":\"1\",\"type\":\"task.created\",\"task\":{\"id\":\"task-000001\",\"title\":\"体验 SSE\",\"completed\":false},\"occurredAt\":\"2026-09-14T00:00:00Z\"}\n\n"
+              }
+            }
+          },
+          "400": {"description": "游标不是合法的非负整数", "content": {"text/plain": {"schema": {"type": "string"}}}}
+        },
+        "x-sse-events": {
+          "ready": {"description": "订阅已建立；携带 latestEventId 和 replayed。"},
+          "task.created": {"$ref": "#/components/schemas/demo.model.v1.TaskEvent"},
+          "task.updated": {"$ref": "#/components/schemas/demo.model.v1.TaskEvent"},
+          "task.deleted": {"$ref": "#/components/schemas/demo.model.v1.TaskEvent"},
+          "reset": {"description": "游标过期；重新拉取当前端的任务列表以同步状态。"}
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "demo.model.v1.TaskEvent": {
+        "type": "object",
+        "description": "单帧 data 的 JSON 结构，对应 api/demo/model/v1/tasks.proto 的 TaskEvent；不是整个 HTTP 响应的结构。",
+        "required": ["eventId", "type", "task", "occurredAt"],
+        "properties": {
+          "eventId": {"type": "string"},
+          "type": {"type": "string", "enum": ["task.created", "task.updated", "task.deleted"]},
+          "task": {"$ref": "#/components/schemas/demo.model.v1.Task"},
+          "occurredAt": {"type": "string", "format": "date-time"}
+        }
+      }
+    }
+  }
+}

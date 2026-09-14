@@ -1,0 +1,164 @@
+syntax = "proto3";
+
+package demo.admin.v1;
+
+import "demo/model/v1/tasks.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "example.com/api-toolchain-demo/gen/demo/admin/v1;adminv1";
+option (gnostic.openapi.v3.document) = {
+  info: {
+    title: "Proto API Lab · 管理端"
+    version: "1.0.0"
+    description: "Go + Buf + gRPC-Gateway 示例。任务接口由 proto 生成；SSE 与健康检查通过受控文档片段合并。数据只保存在内存，重启后清空。"
+  }
+};
+
+// TaskService 提供任务 CRUD；同一份实现同时服务 gRPC 和 HTTP。
+service AdminTaskService {
+  // CreateTask 创建任务，并向 SSE 订阅者推送 task.created。
+  rpc CreateTask(CreateTaskRequest) returns (CreateTaskResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/tasks"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      tags: "任务"
+      summary: "创建任务"
+      responses: {
+        response_or_reference: {
+          name: "201"
+          value: {
+            response: {
+              description: "任务已创建"
+              content: {
+                additional_properties: {
+                  name: "application/json"
+                  value: {
+                    schema: {
+                      reference: {_ref: "#/components/schemas/demo.admin.v1.CreateTaskResponse"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+  }
+
+  // ListTasks 按创建顺序分页查询，可筛选完成状态。
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse) {
+    option (google.api.http) = {get: "/admin/v1/tasks"};
+    option (gnostic.openapi.v3.operation) = {
+      tags: "任务"
+      summary: "查询任务列表"
+    };
+  }
+
+  // GetTask 查询单个任务；不存在时返回 HTTP 404。
+  rpc GetTask(GetTaskRequest) returns (GetTaskResponse) {
+    option (google.api.http) = {get: "/admin/v1/tasks/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      tags: "任务"
+      summary: "查询任务详情"
+    };
+  }
+
+  // UpdateTask 部分更新；optional 区分“不修改”和显式传入 false / 空字符串。
+  rpc UpdateTask(UpdateTaskRequest) returns (UpdateTaskResponse) {
+    option (google.api.http) = {
+      patch: "/admin/v1/tasks/{id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      tags: "任务"
+      summary: "部分更新任务"
+    };
+  }
+
+  // DeleteTask 删除任务，并向 SSE 订阅者推送 task.deleted。
+  rpc DeleteTask(DeleteTaskRequest) returns (DeleteTaskResponse) {
+    option (google.api.http) = {delete: "/admin/v1/tasks/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      tags: "任务"
+      summary: "删除任务"
+    };
+  }
+  // GetStats 查询内存任务和事件订阅统计。
+  rpc GetStats(GetStatsRequest) returns (GetStatsResponse) {
+    option (google.api.http) = {get: "/admin/v1/stats"};
+    option (gnostic.openapi.v3.operation) = {
+      tags: "管理统计"
+      summary: "查询任务及订阅统计"
+    };
+  }
+}
+
+message CreateTaskRequest {
+  option (gnostic.openapi.v3.schema) = {
+    required: ["title"]
+  };
+  // 标题，去除首尾空白后 1～120 个字符。
+  string title = 1 [(gnostic.openapi.v3.property) = {
+    min_length: 1
+    max_length: 120
+  }];
+  // 描述，最多 1000 个字符。
+  string description = 2 [(gnostic.openapi.v3.property) = {max_length: 1000}];
+}
+
+message CreateTaskResponse {
+  demo.model.v1.Task task = 1;
+}
+
+message ListTasksRequest {
+  // 不传表示查询所有任务；传 false 只查未完成任务。
+  optional bool completed = 1;
+  // 默认 20，最大 100。
+  uint32 limit = 2;
+  uint32 offset = 3;
+}
+
+message ListTasksResponse {
+  repeated demo.model.v1.Task tasks = 1;
+  uint32 total = 2;
+}
+
+message GetTaskRequest {
+  string id = 1;
+}
+
+message GetTaskResponse {
+  demo.model.v1.Task task = 1;
+}
+
+message UpdateTaskRequest {
+  string id = 1;
+  optional string title = 2;
+  optional string description = 3;
+  optional bool completed = 4;
+}
+
+message UpdateTaskResponse {
+  demo.model.v1.Task task = 1;
+}
+
+message DeleteTaskRequest {
+  string id = 1;
+}
+
+message DeleteTaskResponse {
+  string id = 1;
+  bool deleted = 2;
+}
+
+message GetStatsRequest {}
+message GetStatsResponse {
+  uint32 total = 1;
+  uint32 completed = 2;
+  uint32 subscribers = 3;
+  string last_event_id = 4;
+}

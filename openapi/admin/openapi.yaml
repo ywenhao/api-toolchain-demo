@@ -1,0 +1,302 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: Proto API Lab · 管理端
+    description: Go + Buf + gRPC-Gateway 示例。任务接口由 proto 生成；SSE 与健康检查通过受控文档片段合并。数据只保存在内存，重启后清空。
+    version: 1.0.0
+paths:
+    /admin/v1/stats:
+        get:
+            tags:
+                - AdminTaskService
+                - 管理统计
+            summary: 查询任务及订阅统计
+            description: GetStats 查询内存任务和事件订阅统计。
+            operationId: AdminTaskService_GetStats
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/demo.admin.v1.GetStatsResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/google.rpc.Status'
+    /admin/v1/tasks:
+        get:
+            tags:
+                - AdminTaskService
+                - 任务
+            summary: 查询任务列表
+            description: ListTasks 按创建顺序分页查询，可筛选完成状态。
+            operationId: AdminTaskService_ListTasks
+            parameters:
+                - name: completed
+                  in: query
+                  description: 不传表示查询所有任务；传 false 只查未完成任务。
+                  schema:
+                    type: boolean
+                - name: limit
+                  in: query
+                  description: 默认 20，最大 100。
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: offset
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/demo.admin.v1.ListTasksResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/google.rpc.Status'
+        post:
+            tags:
+                - AdminTaskService
+                - 任务
+            summary: 创建任务
+            description: CreateTask 创建任务，并向 SSE 订阅者推送 task.created。
+            operationId: AdminTaskService_CreateTask
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/demo.admin.v1.CreateTaskRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/demo.admin.v1.CreateTaskResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/google.rpc.Status'
+                "201":
+                    description: 任务已创建
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/demo.admin.v1.CreateTaskResponse'
+    /admin/v1/tasks/{id}:
+        get:
+            tags:
+                - AdminTaskService
+                - 任务
+            summary: 查询任务详情
+            description: GetTask 查询单个任务；不存在时返回 HTTP 404。
+            operationId: AdminTaskService_GetTask
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/demo.admin.v1.GetTaskResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/google.rpc.Status'
+        delete:
+            tags:
+                - AdminTaskService
+                - 任务
+            summary: 删除任务
+            description: DeleteTask 删除任务，并向 SSE 订阅者推送 task.deleted。
+            operationId: AdminTaskService_DeleteTask
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/demo.admin.v1.DeleteTaskResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/google.rpc.Status'
+        patch:
+            tags:
+                - AdminTaskService
+                - 任务
+            summary: 部分更新任务
+            description: UpdateTask 部分更新；optional 区分“不修改”和显式传入 false / 空字符串。
+            operationId: AdminTaskService_UpdateTask
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/demo.admin.v1.UpdateTaskRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/demo.admin.v1.UpdateTaskResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/google.rpc.Status'
+components:
+    schemas:
+        demo.admin.v1.CreateTaskRequest:
+            required:
+                - title
+            type: object
+            properties:
+                title:
+                    maxLength: 120
+                    minLength: 1
+                    type: string
+                    description: 标题，去除首尾空白后 1～120 个字符。
+                description:
+                    maxLength: 1000
+                    type: string
+                    description: 描述，最多 1000 个字符。
+        demo.admin.v1.CreateTaskResponse:
+            type: object
+            properties:
+                task:
+                    $ref: '#/components/schemas/demo.model.v1.Task'
+        demo.admin.v1.DeleteTaskResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                deleted:
+                    type: boolean
+        demo.admin.v1.GetStatsResponse:
+            type: object
+            properties:
+                total:
+                    type: integer
+                    format: uint32
+                completed:
+                    type: integer
+                    format: uint32
+                subscribers:
+                    type: integer
+                    format: uint32
+                lastEventId:
+                    type: string
+        demo.admin.v1.GetTaskResponse:
+            type: object
+            properties:
+                task:
+                    $ref: '#/components/schemas/demo.model.v1.Task'
+        demo.admin.v1.ListTasksResponse:
+            type: object
+            properties:
+                tasks:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/demo.model.v1.Task'
+                total:
+                    type: integer
+                    format: uint32
+        demo.admin.v1.UpdateTaskRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                completed:
+                    type: boolean
+        demo.admin.v1.UpdateTaskResponse:
+            type: object
+            properties:
+                task:
+                    $ref: '#/components/schemas/demo.model.v1.Task'
+        demo.model.v1.Task:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                completed:
+                    type: boolean
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+            description: Task 是任务数据；时间使用 RFC 3339 JSON 字符串。
+        google.protobuf.Any:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        google.rpc.Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/google.protobuf.Any'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+tags:
+    - name: AdminTaskService

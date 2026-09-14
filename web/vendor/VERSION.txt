@@ -1,0 +1,5 @@
+swagger-ui-dist@5.32.15
+Source: https://www.npmjs.com/package/swagger-ui-dist
+swagger-ui-bundle.js sha256:a7e344f2770b2f07527ce828e0951626983b8f2dcdb7a826689c0232023f995b
+swagger-ui.css sha256:d7f39f764aa18c7b47dd05b9af5613e373e4ac0f3557c2693d52d0abc2464d76
+LICENSE sha256:cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30

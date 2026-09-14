@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package demo.model.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "example.com/api-toolchain-demo/gen/demo/model/v1;modelv1";
+
+// Task 是任务数据；时间使用 RFC 3339 JSON 字符串。
+message Task {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  bool completed = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+// TaskEvent 定义 SSE data 的负载，HTTP 的 SSE 分帧由手写 handler 负责。
+message TaskEvent {
+  string event_id = 1;
+  string type = 2;
+  Task task = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+}

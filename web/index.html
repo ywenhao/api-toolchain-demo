@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Proto API Lab · CRUD & SSE</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Proto API Lab 首页"><span class="brand-icon">P</span> PROTO<span class="brand-light">API LAB</span></a>
+    <nav aria-label="文档导航"><a id="docs-link" href="/docs/user" target="_blank" rel="noreferrer">用户端文档 ↗</a><a id="spec-link" href="/openapi/user.json" target="_blank" rel="noreferrer">OpenAPI 3 ↗</a><a href="/README.md" target="_blank" rel="noreferrer">中文说明 ↗</a></nav>
+  </header>
+  <main>
+    <section class="intro"><div><p class="eyebrow">A SMALL API. THE WHOLE FLOW.</p><h1>写一次协议，<br><span>看见每一次变化。</span></h1><p class="subtitle">用几个任务体验 proto 生成的 HTTP 接口。新增、修改、删除时，右侧事件流会实时响应。</p></div><div class="stack"><span>Go</span><span>Buf</span><span>gRPC-Gateway</span><span>OpenAPI 3</span></div></section>
+    <div class="role-bar"><div role="group" aria-label="接口分组"><button type="button" id="role-user" class="selected" aria-pressed="true">用户端 USER</button><button type="button" id="role-admin" aria-pressed="false">管理端 ADMIN</button></div><span id="role-description">/user/v1 · 用户端任务接口</span></div>
+    <div class="workspace">
+      <section class="tasks-panel" aria-labelledby="tasks-heading">
+        <div class="panel-heading"><div><p class="eyebrow">01 / REST API</p><h2 id="tasks-heading">任务工作台 <span id="task-count" class="count">0</span></h2></div><button class="text-button" id="refresh" type="button">刷新列表 ↻</button></div>
+        <form id="task-form">
+          <div class="form-top"><h3 id="form-title">创建一个任务</h3><span class="method" id="form-method">POST /user/v1/tasks</span></div>
+          <label for="title">任务名称</label><input id="title" name="title" placeholder="例如：在 Swagger 中调用一个接口" maxlength="120" required autocomplete="off">
+          <label for="description">描述 <span class="muted">可选</span></label><textarea id="description" name="description" placeholder="写一点备注，观察生成的响应结构…" maxlength="1000" rows="2"></textarea>
+          <div class="form-actions"><span id="form-note">修改只保存于内存，重启后清空。</span><div><button id="cancel-edit" class="secondary" type="button" hidden>取消</button><button id="submit" class="primary" type="submit">创建任务 <span aria-hidden="true">＋</span></button></div></div>
+        </form>
+        <div class="list-heading"><span>当前任务</span><span class="muted">点击复选框切换完成状态</span></div>
+        <div id="task-list" aria-live="polite"><div class="empty">正在读取任务…</div></div>
+        <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+      </section>
+      <aside class="events-panel" aria-labelledby="events-heading">
+        <div class="panel-heading"><div><p class="eyebrow">02 / SERVER-SENT EVENTS</p><h2 id="events-heading">实时事件</h2></div><span id="connection" class="connection"><i></i>连接中</span></div>
+        <div class="stream-address"><span class="method">GET</span><code>/user/v1/events</code><span>text/event-stream</span></div>
+        <div class="event-toolbar"><span id="event-count">0 条事件</span><div><button id="toggle-stream" type="button">断开</button><button id="clear-events" type="button">清空</button></div></div>
+        <ol id="event-list" aria-live="polite"><li class="event-placeholder">连接建立后，这里会显示实时事件。<br>也可以打开第二个标签页，观察同步。</li></ol>
+        <div class="stream-note"><span class="live-dot"></span>自动重连 · 事件 ID · 最近 128 条重放</div>
+      </aside>
+    </div>
+    <footer><span>PROTO → GO / HTTP / OPENAPI → SWAGGER</span><span id="api-status">检测服务中…</span></footer>
+  </main>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>

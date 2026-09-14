@@ -1,0 +1,28 @@
+[tools]
+go = "1.27.1"
+"go:github.com/bufbuild/buf/cmd/buf" = "1.73.0"
+
+[tasks.setup]
+description = "下载 go.mod 锁定的依赖和生成工具"
+run = "go mod download"
+
+[tasks.generate]
+description = "检查 proto，生成 Go / HTTP 网关 / Swagger 文档"
+run = ["buf lint", "buf generate", "buf generate --template buf.gen.openapi-user.yaml --path api/demo/user/v1", "buf generate --template buf.gen.openapi-admin.yaml --path api/demo/admin/v1", "go run ./cmd/openapi"]
+
+[tasks.dev]
+description = "启动开发服务；修改 proto / Go / 页面后自动重新生成并重启"
+run = "go tool air"
+
+[tasks.run]
+description = "生成并启动服务，不监听文件变化"
+depends = ["generate"]
+run = "go run ./cmd/server"
+
+[tasks.check]
+description = "检查协议、产物可复现性和编译"
+run = ["buf lint", "go run ./cmd/checkgen", "go build ./..."]
+
+[tasks.smoke]
+description = "验证已启动服务的 CRUD、错误响应和 SSE"
+run = "go run ./cmd/smoke"
